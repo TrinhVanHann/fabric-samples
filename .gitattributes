@@ -1,0 +1,11 @@
+# Convert tất cả file văn bản về LF
+* text=auto eol=lf
+
+# Giữ nguyên binary file
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pdf binary
+*.zip binary
+*.exe binary
