@@ -241,7 +241,9 @@ describe('getJobCounts', () => {
             mockContracts.set('mockMspid', mockContract);
 
             mockApplication = mock<Application>();
-            mockApplication.locals.mockMspid = { messageContract: mockContract };
+            mockApplication.locals.mockMspid = {
+                messageContract: mockContract,
+            };
 
             mockJob = mock<Job>();
         });
