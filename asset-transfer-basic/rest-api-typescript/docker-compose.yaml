@@ -1,27 +1,37 @@
 version: '3'
-# Replace network name with the fabric test-network name 
+
 services:
-  redis: 
+  redis:
     image: 'redis'
     command: ['--maxmemory-policy','noeviction','--requirepass','${REDIS_PASSWORD}']
     ports:
       - 6379:6379
     networks:
       - fabric_test
-  
+
   nodeapp:
-    image: 'ghcr.io/hyperledger/fabric-rest-sample:latest'
-    command: ['start:dotenv']
+    build:
+      context: .
+      dockerfile: Dockerfile.dev  # Sử dụng Dockerfile dành cho dev
+    command: npm run dev         # Chạy lệnh dev thay vì start
     ports:
       - 3000:3000
+      - 9229:9229  # Port cho debugger nếu cần
     env_file:
       - ./.env
     environment:
       - REDIS_PASSWORD
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true  # Cần thiết để watch file trong Docker
+    volumes:
+      - ./:/app
+      - /app/node_modules
     networks:
-        - fabric_test
-
+      - fabric_test
+    # Tùy chọn để giữ container chạy và dễ debug
+    stdin_open: true
+    tty: true
 
 networks:
   fabric_test:
-    external: true 
+    external: true

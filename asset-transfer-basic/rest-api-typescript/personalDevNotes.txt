@@ -1,0 +1,145 @@
+fabric-sample/test-network (WSL):
+    ./network.sh down (might want to clean unwanted running containers, see in Docker)
+    ./network.sh up createChannel -ca (remember to start CA here)
+    docker ps | grep fabric-ca (check running CAs)
+    ./network.sh deployCC -ccn basic -ccp ../asset-transfer-basic/chaincode-typescript/ -ccl typescript
+    (deploy chaincode, from here it can clearly be seen that chaincode should be read and modified in asset-transfer-basic/chaincode-typescript/src)
+-----------------------------------------------------------------------------------------------
+fabric-samples/asset-transfer-basic/application-gateway-typescript (WSL):
+    npm install (if needed)
+    npm start (example will register user1 for Org1 and create some assets)
+    -> simply for data dumb
+-----------------------------------------------------------------------------------------------
+fabric-api:
+    node server.js
+    node enrollAdmin.js (admin.id is now in wallet folder)
+-----------------------------------------------------------------------------------------------
+asset-transfer-basic/chaincode-typescript/src (work with chaincode):
+-----------------------------------------------------------------------------------------------
+fabric-samples/asset-transfer-basic/rest-api-typescript (WSL):
+    This part is strictly following the guidance of https://baltig.infn.it/SDDS/hyperledger-repo/-/tree/main/asset-transfer-basic/rest-api-typescript?ref_type=heads
+        the content of script/generateEnv.sh is also taken from here (dont forget to change the paths at the start of the file)
+
+    npm install (as always)
+    npm run build
+    TEST_NETWORK_HOME=/mnt/d/241/DACN/Blockchain/HF/Telusko/test/fabric-samples/test-network AS_LOCAL_HOST=false npm run generateEnv
+        (
+            pay close attention to the value of TEST_NETWORK_HOME, which is the path to test-network folder
+            AS_LOCAL_HOST=false -> the purpose of this can be seen in script/generateEnv.sh
+                true -> to create some normal localhost api server
+                false -> to deploy servers on docker containers (api + redis)
+        )
+    export REDIS_PASSWORD=$(uuidgen) -> Start a Redis server (Redis is used to store the queue of submit transactions)
+        for now the password is utterly random and will be lost at the end of this section
+
+    npm run start:redis | npm run start:dev (start the Redis and API server, if localhost)
+
+    docker-compose up -d (or start them both at the same time)
+        Note: if you manually start redis server before, port 6379 will be already allocated, free it before hand
+
+TEST API:
+    localhost:
+        in rest-api-typescript:
+            SAMPLE_APIKEY=$(grep ORG1_APIKEY .env | cut -d '=' -f 2-)
+            curl --header "X-Api-Key: ${SAMPLE_APIKEY}" http://localhost:3000/api/assets
+    docker (can be called from Postman):
+        http://localhost:3000/api/assets
+        Headers:
+            Key: x-api-key
+            Value: see the key ORG1_APIKEY in rest-api-typescript/.env
+
+Docker:
+    docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
+    (down every containers)
+
+CODE DOC:
+
+    src/fabric.ts (connection + communication):
+        Create In-Memory Wallet
+        Create Gateway
+        Take Network/Smart contract
+        Trasactions: evaluate(read) + submit
+        Get transactions validation code
+        Get current number of block
+
+    src/index.ts (entry point + job queue):
+        Test Redis config
+        Create REST server
+        Connect to Org1 and Org2
+        Get Contract to use, this contract will stay in app.locals
+        Run server + Handle errors
+
+    IMPORTANT!!!
+    src/assets.router.ts (CRUD for assets):
+        /api/assets
+        GET     "/" -> get all assets (base on mspId = req.user take the corresponding contract from req.app.locals[mspId])
+                        chaincode function "GetAllAssets"
+                        return JSON
+        POST    "/" -> create new asset
+                        chaincode function "CreateAsset"
+                        Check request body
+                        add job to job queue
+                        return HTTP 202 ACCEPTED and jobId
+        GET     "/:assetId"
+                    -> get asset based on ID
+                        chaincode function "ReadAsset"
+                        return JSON
+        PUT     "/:assetId"
+                    -> update asset
+                        chaincode function "UpdateAsset"
+
+        queue is used for asynchronous transactions handling
+        Read -> instant response
+        Create, Update, Delete -> 202 ACCEPTED + jobId
+        express-validator -> check request body
+
+    src/jobs.router.ts (endpoint for getting job status):
+        /api/jobs
+        GET     "/:jobId"
+                    -> get job status in queue by jobId
+
+        Job queue is saved in req.app.locals.jobq , managed by BullMQ
+
+    src/jobs.ts -> Job queue implementation details
+
+    src/transactions.router.ts (endpoint for getting transaction status):
+        GET     "/transactions/:transactionId"
+                    -> get transaction status
+
+        used QSCC (Query System Chaincode) in Hyperledger Fabric, main APIs:
+            GetTransactionByID
+            etBlockByNumber, GetBlockByHash
+            GetChainInfo
+        -> QSCC is a part of the network and CANNOT be changed, help query info from Blockchain without the need to deploy a Smart Contract
+
+    src/auth.ts
+        fabricAPIKeyStrategy implements HeaderAPIKeyStrategy (from passport-headerapikey)
+                            under the name 'headerapikey' in passport
+                            now can only recognize 2 API_KEY (give it a look)
+        authenticateApiKey automatically use fabricAPIKeyStrategy through passport.authenticate('headerapikey')
+            check API_KEY based on strategy provided
+
+    IMPORTANT!!!
+    src/config.ts -> Descriptions of all the available configuration environment variables.
+
+    src/redis.ts
+        maxmemory-policy = noeviction -> good
+
+REST API note:
+
+    Vấn đề với REST API và Hyperledger Fabric:
+        - Khi thực hiện giao dịch (tạo, cập nhật, xóa, chuyển tài sản) trên Fabric network, thời gian phản hồi có thể lâu.
+        - Điều này không phù hợp với mô hình REST API truyền thống, nơi phản hồi cần nhanh chóng.
+
+    Giải pháp dùng "Job" để xử lý giao dịch dài:
+        - Khi gửi yêu cầu giao dịch (tạo, cập nhật, xóa, chuyển tài sản), thay vì chờ giao dịch hoàn thành, API sẽ trả về mã 202 ACCEPTED ngay lập tức.
+        - Yêu cầu giao dịch sẽ được đưa vào hàng đợi công việc (job queue) để xử lý nền.
+        - Phản hồi của API sẽ chứa một jobId.
+
+    Lấy kết quả của giao dịch qua API khác:
+        - Người dùng có thể gọi /api/jobs/{jobId} để kiểm tra trạng thái giao dịch (thành công, thất bại, đang xử lý...).
+        - Điều này giúp API không bị chậm do chờ đợi giao dịch hoàn thành.
+
+    Lưu ý:
+        - Các giao dịch chỉ được đưa vào job queue nếu là loại "ghi" (tạo, cập nhật, xóa, chuyển).
+        - Các giao dịch "đọc" (lấy tài sản) không cần job vì chúng thường chạy nhanh hơn.

@@ -109,16 +109,16 @@ export const getNetwork = async (gateway: Gateway): Promise<Network> => {
  */
 export const getContracts = async (
     network: Network
-): Promise<{ assetContract: Contract; qsccContract: Contract }> => {
-    const assetContract = network.getContract(config.chaincodeName);
+): Promise<{ messageContract: Contract; qsccContract: Contract }> => {
+    const messageContract = network.getContract(config.chaincodeName);
     const qsccContract = network.getContract('qscc');
-    return { assetContract, qsccContract };
+    return { messageContract, qsccContract };
 };
 
 /**
  * Evaluate a transaction and handle any errors
  */
-export const evatuateTransaction = async (
+export const evaluateTransaction = async (
     contract: Contract,
     transactionName: string,
     ...transactionArgs: string[]
@@ -168,7 +168,7 @@ export const getTransactionValidationCode = async (
     qsccContract: Contract,
     transactionId: string
 ): Promise<string> => {
-    const data = await evatuateTransaction(
+    const data = await evaluateTransaction(
         qsccContract,
         'GetTransactionByID',
         config.channelName,

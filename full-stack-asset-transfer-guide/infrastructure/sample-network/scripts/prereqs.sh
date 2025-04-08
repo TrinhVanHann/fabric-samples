@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 #
 # Copyright contributors to the Hyperledger Fabric Operator project
 #

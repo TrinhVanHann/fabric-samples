@@ -1,0 +1,25 @@
+FROM node:18-alpine3.14
+
+# Cài đặt các phụ thuộc cần thiết
+RUN apk add --no-cache g++ make python3 dumb-init git
+
+# Tạo thư mục app và chuyển ownership cho user node
+RUN mkdir -p /app && chown node:node /app
+WORKDIR /app
+USER node
+
+# Copy package files với đúng permissions
+COPY --chown=node:node package*.json ./
+
+# Cài đặt dependencies
+RUN npm install
+
+# Copy source code
+COPY --chown=node:node . .
+
+# Expose các port
+EXPOSE 3000 9229
+
+# Sử dụng dumb-init và chạy ứng dụng
+ENTRYPOINT [ "dumb-init", "--" ]
+CMD [ "npm", "run", "dev" ]

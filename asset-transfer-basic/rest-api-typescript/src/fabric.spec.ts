@@ -7,7 +7,7 @@ import {
     createWallet,
     getContracts,
     getNetwork,
-    evatuateTransaction,
+    evaluateTransaction,
     submitTransaction,
     getBlockHeight,
     getTransactionValidationCode,
@@ -111,13 +111,13 @@ describe('Fabric', () => {
             const contracts = await getContracts(mockNetwork);
 
             expect(contracts).toStrictEqual({
-                assetContract: mockBasicContract,
+                messageContract: mockBasicContract,
                 qsccContract: mockSystemContract,
             });
         });
     });
 
-    describe('evatuateTransaction', () => {
+    describe('evaluateTransaction', () => {
         const mockPayload = Buffer.from('MOCK PAYLOAD');
         let mockTransaction: MockProxy<Transaction>;
         let mockContract: MockProxy<Contract>;
@@ -132,7 +132,7 @@ describe('Fabric', () => {
         });
 
         it('gets the result of evaluating a transaction', async () => {
-            const result = await evatuateTransaction(
+            const result = await evaluateTransaction(
                 mockContract,
                 'txn',
                 'arga',
@@ -147,7 +147,7 @@ describe('Fabric', () => {
             );
 
             await expect(async () => {
-                await evatuateTransaction(mockContract, 'txn', 'arga', 'argb');
+                await evaluateTransaction(mockContract, 'txn', 'arga', 'argb');
             }).rejects.toThrow(AssetExistsError);
         });
 
@@ -157,7 +157,7 @@ describe('Fabric', () => {
             );
 
             await expect(async () => {
-                await evatuateTransaction(mockContract, 'txn', 'arga', 'argb');
+                await evaluateTransaction(mockContract, 'txn', 'arga', 'argb');
             }).rejects.toThrow(AssetNotFoundError);
         });
 
@@ -169,14 +169,14 @@ describe('Fabric', () => {
             );
 
             await expect(async () => {
-                await evatuateTransaction(mockContract, 'txn', 'arga', 'argb');
+                await evaluateTransaction(mockContract, 'txn', 'arga', 'argb');
             }).rejects.toThrow(TransactionNotFoundError);
         });
 
         it('throws an Error for other errors', async () => {
             mockTransaction.evaluate.mockRejectedValue(new Error('MOCK ERROR'));
             await expect(async () => {
-                await evatuateTransaction(mockContract, 'txn', 'arga', 'argb');
+                await evaluateTransaction(mockContract, 'txn', 'arga', 'argb');
             }).rejects.toThrow(Error);
         });
     });

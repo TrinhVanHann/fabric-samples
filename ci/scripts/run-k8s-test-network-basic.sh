@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -e
 #
 # Copyright IBM Corp All Rights Reserved
 #

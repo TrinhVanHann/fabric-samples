@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 #
 # This script fully tears down and deletes all artifacts from the sample network that was started with ./scripts/up.sh.
 

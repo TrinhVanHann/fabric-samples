@@ -115,7 +115,7 @@ export const processSubmitTransactionJob = async (
 ): Promise<JobResult> => {
     logger.debug({ jobId: job.id, jobName: job.name }, 'Processing job');
 
-    const contract = app.locals[job.data.mspid]?.assetContract as Contract;
+    const contract = app.locals[job.data.mspid]?.messageContract as Contract;
     if (contract === undefined) {
         logger.error(
             { jobId: job.id, jobName: job.name },

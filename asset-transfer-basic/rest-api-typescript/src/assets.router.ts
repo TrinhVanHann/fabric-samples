@@ -24,7 +24,7 @@ import { Contract } from 'fabric-network';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 import { Queue } from 'bullmq';
 import { AssetNotFoundError } from './errors';
-import { evatuateTransaction } from './fabric';
+import { evaluateTransaction } from './fabric';
 import { addSubmitTransactionJob } from './jobs';
 import { logger } from './logger';
 
@@ -37,9 +37,9 @@ assetsRouter.get('/', async (req: Request, res: Response) => {
     logger.debug('Get all assets request received');
     try {
         const mspId = req.user as string;
-        const contract = req.app.locals[mspId]?.assetContract as Contract;
+        const contract = req.app.locals[mspId]?.messageContract as Contract;
 
-        const data = await evatuateTransaction(contract, 'GetAllAssets');
+        const data = await evaluateTransaction(contract, 'GetAllAssets');
         let assets = [];
         if (data.length > 0) {
             assets = JSON.parse(data.toString());
@@ -119,9 +119,9 @@ assetsRouter.options('/:assetId', async (req: Request, res: Response) => {
 
     try {
         const mspId = req.user as string;
-        const contract = req.app.locals[mspId]?.assetContract as Contract;
+        const contract = req.app.locals[mspId]?.messageContract as Contract;
 
-        const data = await evatuateTransaction(
+        const data = await evaluateTransaction(
             contract,
             'AssetExists',
             assetId
@@ -163,9 +163,9 @@ assetsRouter.get('/:assetId', async (req: Request, res: Response) => {
 
     try {
         const mspId = req.user as string;
-        const contract = req.app.locals[mspId]?.assetContract as Contract;
+        const contract = req.app.locals[mspId]?.messageContract as Contract;
 
-        const data = await evatuateTransaction(contract, 'ReadAsset', assetId);
+        const data = await evaluateTransaction(contract, 'ReadAsset', assetId);
         const asset = JSON.parse(data.toString());
 
         return res.status(OK).json(asset);

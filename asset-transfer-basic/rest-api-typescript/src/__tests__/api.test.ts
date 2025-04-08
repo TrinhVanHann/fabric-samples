@@ -116,7 +116,7 @@ describe('Asset Transfer Besic REST API', () => {
                 .calledWith('GetAllAssets')
                 .mockReturnValue(mockGetAllAssetsTransaction);
             app.locals[config.mspIdOrg1] = {
-                assetContract: mockBasicContract,
+                messageContract: mockBasicContract,
             };
         });
 
@@ -279,7 +279,7 @@ describe('Asset Transfer Besic REST API', () => {
                 .mockReturnValue(mockReadAssetTransaction);
 
             app.locals[config.mspIdOrg1] = {
-                assetContract: mockBasicContract,
+                messageContract: mockBasicContract,
             };
         });
 

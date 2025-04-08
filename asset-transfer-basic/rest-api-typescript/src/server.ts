@@ -7,7 +7,8 @@ import helmet from 'helmet';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 import passport from 'passport';
 import pinoMiddleware from 'pino-http';
-import { assetsRouter } from './assets.router';
+// import { assetsRouter } from './assets.router';
+import { messagesRouter } from './messages.router';
 import { authenticateApiKey, fabricAPIKeyStrategy } from './auth';
 import { healthRouter } from './health.router';
 import { jobsRouter } from './jobs.router';
@@ -62,7 +63,8 @@ export const createServer = async (): Promise<Application> => {
     }
 
     app.use('/', healthRouter);
-    app.use('/api/assets', authenticateApiKey, assetsRouter);
+    // app.use('/api/assets', authenticateApiKey, assetsRouter);
+    app.use('/api/messages', authenticateApiKey, messagesRouter);
     app.use('/api/jobs', authenticateApiKey, jobsRouter);
     app.use('/api/transactions', authenticateApiKey, transactionsRouter);
 
@@ -83,5 +85,28 @@ export const createServer = async (): Promise<Application> => {
         });
     });
 
+    logAllRoutes(app);
+
     return app;
 };
+
+interface Layer {
+    route?: {
+        path: string;
+        methods: { [key: string]: boolean };
+    };
+}
+
+function logAllRoutes(app: Application): void {
+    const stack = app._router?.stack as Layer[];
+
+    const routes = stack
+        .filter((layer: Layer) => layer.route)
+        .map((layer: Layer) => {
+            const method = Object.keys(layer.route!.methods)[0].toUpperCase();
+            return `${method} ${layer.route!.path}`;
+        });
+
+    console.log('Registered routes:');
+    routes.forEach((r: string) => console.log(r));
+}

@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 function createOrg1() {
   infoln "Enrolling the CA admin"

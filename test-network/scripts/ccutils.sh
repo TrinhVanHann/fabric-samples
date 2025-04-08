@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # installChaincode PEER ORG
 function installChaincode() {

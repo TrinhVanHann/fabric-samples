@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # This script uses the logspout and http stream tools to let you watch the docker containers
 # in action.
