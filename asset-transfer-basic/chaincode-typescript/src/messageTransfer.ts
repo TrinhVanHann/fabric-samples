@@ -76,6 +76,32 @@ export class MessageTransferContract extends Contract {
         return messageJSON.toString();
     }
 
+    // GetMessagesByMessageId returns all messages with the given messageId.
+    @Transaction(false)
+    @Returns('string')
+    public async GetMessagesByMessageId(ctx: Context, targetMessageId: number): Promise<string> {
+        const allResults = [];
+        const iterator = await ctx.stub.getStateByRange('', '');
+        let result = await iterator.next();
+
+        while (!result.done) {
+            const strValue = Buffer.from(result.value.value.toString()).toString('utf8');
+            let record: Message;
+            try {
+                record = JSON.parse(strValue) as Message;
+                if (record.messageId === targetMessageId) {
+                    allResults.push(record);
+                }
+            } catch (err) {
+                console.log(`Skipping invalid record`);
+            }
+            result = await iterator.next();
+        }
+
+        return JSON.stringify(allResults);
+    }
+
+
     // UpdateMessage updates an existing message in the world state with the provided parameters.
     @Transaction()
     public async UpdateMessage(

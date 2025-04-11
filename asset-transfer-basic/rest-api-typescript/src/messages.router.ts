@@ -198,6 +198,32 @@ messagesRouter.get('/:id', async (req: Request, res: Response) => {
     }
 });
 
+messagesRouter.get('/by-message-id/:messageId', async (req: Request, res: Response) => {
+    const messageId = req.params.messageId;
+    logger.debug('Get messages request received for messageId %s', messageId);
+
+    try {
+        const mspId = req.user as string;
+        const contract = req.app.locals[mspId]?.messageContract as Contract;
+
+        const data = await evaluateTransaction(contract, 'GetMessagesByMessageId', messageId);
+        const messages = JSON.parse(data.toString());
+
+        return res.status(OK).json(messages);
+    } catch (err) {
+        logger.error(
+            { err },
+            'Error processing get messages request for messageId %s',
+            messageId
+        );
+
+        return res.status(INTERNAL_SERVER_ERROR).json({
+            status: getReasonPhrase(INTERNAL_SERVER_ERROR),
+            timestamp: new Date().toISOString(),
+        });
+    }
+});
+
 messagesRouter.put(
     '/:id',
     body().isObject().withMessage('body must contain a message object'),
