@@ -68,13 +68,13 @@ messagesRouter.get('/', async (req: Request, res: Response) => {
 
 messagesRouter.post(
     '/',
-    body().isObject().withMessage('body must contain an message object'),
+    body().isObject().withMessage('body must contain a message object'),
     body('id', 'must be a string').notEmpty(),
-    body('messageId', 'must be a string').notEmpty(),
-    body('userId', 'must be a string').notEmpty(),
+    body('messageId', 'must be a number').isNumeric(),
+    body('userId', 'must be a number').isNumeric(),
     body('content', 'must be a string').notEmpty(),
-    body('type', 'must be a number').notEmpty(),
-    body('createdAt', 'must be a number').notEmpty(),
+    body('type', 'must be a number').isNumeric(),
+    body('createdAt', 'must be a string').notEmpty(),
     async (req: Request, res: Response) => {
         logger.debug(req.body, 'Create message request received');
 
@@ -200,12 +200,12 @@ messagesRouter.get('/:id', async (req: Request, res: Response) => {
 
 messagesRouter.put(
     '/:id',
-    body().isObject().withMessage('body must contain an message object'),
+    body().isObject().withMessage('body must contain a message object'),
     body('id', 'must be a string').notEmpty(),
-    body('messageId', 'must be a string').notEmpty(),
-    body('userId', 'must be a string').notEmpty(),
+    body('messageId', 'must be a number').isNumeric(),
+    body('userId', 'must be a number').isNumeric(),
     body('content', 'must be a string').notEmpty(),
-    body('type', 'must be a string').notEmpty(),
+    body('type', 'must be a number').isNumeric(),
     body('createdAt', 'must be a string').notEmpty(),
     async (req: Request, res: Response) => {
         logger.debug(req.body, 'Update message request received');
