@@ -13,19 +13,19 @@ export class MessageTransferContract extends Contract {
     public async InitLedger(ctx: Context): Promise<void> {
         const messages: Message[] = [
             {
-                id: 'msg1',
-                messageId: 'msg1',
-                userId: 'user1',
+                id: '1',
+                messageId: 3,
+                userId: 5,
                 content: 'Hello World!',
-                type: 'text',
+                type: 0,
                 createdAt: '2025-04-04T10:00:00Z',
             },
             {
-                id: 'msg2',
-                messageId: 'msg2',
-                userId: 'user2',
+                id: '2',
+                messageId: 3,
+                userId: 4,
                 content: 'Fabric Smart Contracts are cool!',
-                type: 'text',
+                type: 0,
                 createdAt: '2025-04-04T10:05:00Z',
             }
         ];
@@ -39,7 +39,15 @@ export class MessageTransferContract extends Contract {
 
     // CreateMessage issues a new message to the world state with the given details.
     @Transaction()
-    public async CreateMessage(ctx: Context, id: string, messageId: string, userId: string, content: string, type: string, createdAt: string): Promise<void> {
+    public async CreateMessage(
+        ctx: Context,
+        id: string,
+        messageId: number,
+        userId: number,
+        content: string,
+        type: number,
+        createdAt: string
+    ): Promise<void> {
         const exists = await this.MessageExists(ctx, id);
         if (exists) {
             throw new Error(`The message ${id} already exists`);
@@ -70,7 +78,15 @@ export class MessageTransferContract extends Contract {
 
     // UpdateMessage updates an existing message in the world state with the provided parameters.
     @Transaction()
-    public async UpdateMessage(ctx: Context, id: string, messageId: string, userId: string, content: string, type: string, createdAt: string): Promise<void> {
+    public async UpdateMessage(
+        ctx: Context,
+        id: string,
+        messageId: number,
+        userId: number,
+        content: string,
+        type: number,
+        createdAt: string
+    ): Promise<void> {
         const exists = await this.MessageExists(ctx, id);
         if (!exists) {
             throw new Error(`The message ${id} does not exist`);
@@ -108,7 +124,7 @@ export class MessageTransferContract extends Contract {
 
     // TransferMessage updates the userId field of a message with the given id and returns the old userId.
     @Transaction()
-    public async TransferMessage(ctx: Context, id: string, newUserId: string): Promise<string> {
+    public async TransferMessage(ctx: Context, id: string, newUserId: number): Promise<number> {
         const messageString = await this.ReadMessage(ctx, id);
         const message = JSON.parse(messageString) as Message;
         const oldUserId = message.userId;

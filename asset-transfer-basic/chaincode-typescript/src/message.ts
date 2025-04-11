@@ -13,16 +13,16 @@ export class Message {
     public id: string = '';
 
     @Property()
-    public messageId: string = '';
+    public messageId: number = 0;
 
     @Property()
-    public userId: string = '';
+    public userId: number = 0;
 
     @Property()
     public content: string = '';
 
     @Property()
-    public type: string = 'text';
+    public type: number = 0;
 
     @Property()
     public createdAt: string = '';
