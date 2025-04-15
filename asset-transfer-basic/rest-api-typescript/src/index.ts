@@ -62,6 +62,10 @@ async function main() {
 
     app.locals[config.mspIdOrg2] = contractsOrg2;
 
+    logger.info(`Contracts for ${config.mspIdOrg1}:`, Object.keys(app.locals[config.mspIdOrg1] || {}));
+    logger.info(`Contracts for ${config.mspIdOrg2}:`, Object.keys(app.locals[config.mspIdOrg2] || {}));
+
+
     logger.info('Initialising submit job queue');
     jobQueue = initJobQueue();
     jobQueueWorker = initJobQueueWorker(app);
