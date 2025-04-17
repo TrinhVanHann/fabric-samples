@@ -111,7 +111,17 @@ CaRouter.post(
             }
 
             await registerAndEnrollUser(caClient, wallet, mspOrg1, userId, affiliation);
-            res.status(OK).send(`✅ User ${userId} registered & enrolled successfully`);
+
+            const userIdentity = await wallet.get(userId) as X509Identity;
+
+            if (!userIdentity) {
+                return res.status(INTERNAL_SERVER_ERROR).send('❌ Failed to retrieve newly registered identity');
+            }
+
+            res.status(OK).json({
+                message: `✅ User ${userId} registered & enrolled successfully`,
+                privateKey: userIdentity.credentials.privateKey,
+            });
         } catch (err) {
             logger.error(`Error registering user: ${(err as Error).message}`);
             res.status(INTERNAL_SERVER_ERROR).send('❌ Failed to register user');
