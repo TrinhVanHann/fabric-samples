@@ -66,9 +66,9 @@ export const createServer = async (): Promise<Application> => {
 
     app.use('/', healthRouter);
     // app.use('/api/assets', authenticateApiKey, assetsRouter);
-    // app.use('/api/auth', authRouter);
-    app.use('/api/ca', authenticateApiKey, CaRouter);
-    app.use('/api/messages', messagesRouter);
+    app.use('/api/auth', authRouter);
+    app.use('/api/ca', CaRouter);
+    app.use('/api/messages', authenticateApiKey, messagesRouter);
     app.use('/api/jobs', authenticateApiKey, jobsRouter);
     app.use('/api/transactions', authenticateApiKey, transactionsRouter);
 

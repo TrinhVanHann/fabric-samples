@@ -7,6 +7,7 @@ import crypto from 'crypto';
 import { logger } from './logger';
 import { loginWithPrivateKey } from './auth.service';
 import * as config from './config';
+import { setContract } from './contracts.store';
 
 const { ACCEPTED, BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK, UNAUTHORIZED } =
     StatusCodes;
@@ -39,8 +40,10 @@ authRouter.post(
                 });
             }
 
-            req.app.locals[config.mspIdOrg1] = contract;
-            // logger.info(req.app.locals[config.mspIdOrg1]);
+            req.app.locals[userId] = contract;
+            logger.info(req.app.locals[userId] ? "Found" : "Not Found");
+
+            // setContract(userId, contract);
 
             // Generate apiKey or JWT here
             const apiKey = crypto.randomBytes(32).toString('hex');

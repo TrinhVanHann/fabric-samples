@@ -38,33 +38,32 @@ async function main() {
     logger.info('Creating REST server');
     const app = await createServer();
 
-    logger.info('Connecting to Fabric network with org1 mspid');
-    const wallet = await createWallet();
+    // logger.info('Connecting to Fabric network with org1 mspid');
+    // const wallet = await createWallet();
 
-    const gatewayOrg1 = await createGateway(
-        config.connectionProfileOrg1,
-        config.mspIdOrg1,
-        wallet
-    );
-    const networkOrg1 = await getNetwork(gatewayOrg1);
-    const contractsOrg1 = await getContracts(networkOrg1);
+    // const gatewayOrg1 = await createGateway(
+    //     config.connectionProfileOrg1,
+    //     config.mspIdOrg1,
+    //     wallet
+    // );
+    // const networkOrg1 = await getNetwork(gatewayOrg1);
+    // const contractsOrg1 = await getContracts(networkOrg1);
 
-    app.locals[config.mspIdOrg1] = contractsOrg1;
+    // app.locals[config.mspIdOrg1] = contractsOrg1;
 
-    logger.info('Connecting to Fabric network with org2 mspid');
-    const gatewayOrg2 = await createGateway(
-        config.connectionProfileOrg2,
-        config.mspIdOrg2,
-        wallet
-    );
-    const networkOrg2 = await getNetwork(gatewayOrg2);
-    const contractsOrg2 = await getContracts(networkOrg2);
+    // logger.info('Connecting to Fabric network with org2 mspid');
+    // const gatewayOrg2 = await createGateway(
+    //     config.connectionProfileOrg2,
+    //     config.mspIdOrg2,
+    //     wallet
+    // );
+    // const networkOrg2 = await getNetwork(gatewayOrg2);
+    // const contractsOrg2 = await getContracts(networkOrg2);
 
-    app.locals[config.mspIdOrg2] = contractsOrg2;
+    // app.locals[config.mspIdOrg2] = contractsOrg2;
 
-    logger.info(`Contracts for ${config.mspIdOrg1}:`, Object.keys(app.locals[config.mspIdOrg1] || {}));
-    logger.info(`Contracts for ${config.mspIdOrg2}:`, Object.keys(app.locals[config.mspIdOrg2] || {}));
-
+    // logger.info(contractsOrg1.messageContract ? "Contract1 Found" : "Contract1 Not Found");
+    // logger.info(contractsOrg2 ? "Contract2 Found" : "Contract2 Not Found");
 
     logger.info('Initialising submit job queue');
     jobQueue = initJobQueue();

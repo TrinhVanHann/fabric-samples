@@ -58,7 +58,5 @@ export const loginWithPrivateKey = async (userId: string, privateKey: string): P
         return contract;
     } catch (err) {
         throw new Error('Invalid private key or failed to connect to network');
-    } finally {
-        gateway.disconnect();
     }
 };
