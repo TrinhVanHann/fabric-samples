@@ -19,10 +19,11 @@ import {
 import { logger } from './logger';
 
 
+
 const ccpPath = '/test-network/organizations/peerOrganizations/org1.example.com/connection-org1.json';
 const walletPath = path.join(__dirname, 'wallet');
 
-export const loginWithPrivateKey = async (userId: string, privateKey: string): Promise<boolean> => {
+export const loginWithPrivateKey = async (userId: string, privateKey: string): Promise<{ messageContract: Contract; qsccContract: Contract }> => {
     // Load connection profile
     const ccp = JSON.parse(fs.readFileSync(ccpPath, 'utf8'));
 
@@ -49,28 +50,13 @@ export const loginWithPrivateKey = async (userId: string, privateKey: string): P
     const tempWallet = await Wallets.newInMemoryWallet();
     await tempWallet.put(userId, tempIdentity);
 
-    // Try connecting to Fabric with this temporal identity
-    const gateway = new Gateway();
+    const gateway = await createGateway(config.connectionProfileOrg1, userId, tempWallet);
     try {
-        await gateway.connect(ccp, {
-            wallet: tempWallet,
-            identity: userId,
-            discovery: { enabled: true, asLocalhost: true },
-            eventHandlerOptions: {
-                commitTimeout: config.commitTimeout,
-                endorseTimeout: config.endorseTimeout,
-                strategy: DefaultEventHandlerStrategies.PREFER_MSPID_SCOPE_ANYFORTX,
-            },
-            queryHandlerOptions: {
-                timeout: config.queryTimeout,
-                strategy:
-                    DefaultQueryHandlerStrategies.PREFER_MSPID_SCOPE_ROUND_ROBIN,
-            },
-        });
-        return true;
+        const network = await getNetwork(gateway);
+        const contract = await getContracts(network);
+
+        return contract;
     } catch (err) {
         throw new Error('Invalid private key or failed to connect to network');
-    } finally {
-        gateway.disconnect();
     }
 };

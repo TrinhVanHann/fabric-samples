@@ -46,10 +46,10 @@ export const createServer = async (): Promise<Application> => {
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
 
-    // define passport startegy
+    // Define passport strategy
     passport.use(fabricAPIKeyStrategy);
 
-    // initialize passport js
+    // Initialize passport js
     app.use(passport.initialize());
 
     if (process.env.NODE_ENV === 'development') {
@@ -67,7 +67,7 @@ export const createServer = async (): Promise<Application> => {
     app.use('/', healthRouter);
     // app.use('/api/assets', authenticateApiKey, assetsRouter);
     app.use('/api/auth', authRouter);
-    app.use('/api/ca', authenticateApiKey, CaRouter);
+    app.use('/api/ca', CaRouter);
     app.use('/api/messages', authenticateApiKey, messagesRouter);
     app.use('/api/jobs', authenticateApiKey, jobsRouter);
     app.use('/api/transactions', authenticateApiKey, transactionsRouter);

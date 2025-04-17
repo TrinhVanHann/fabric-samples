@@ -27,6 +27,8 @@ import { AssetNotFoundError } from './errors';
 import { evaluateTransaction } from './fabric';
 import { addSubmitTransactionJob } from './jobs';
 import { logger } from './logger';
+import * as config from './config';
+import { getContract } from './contracts.store';
 
 const { ACCEPTED, BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK } =
     StatusCodes;
@@ -41,11 +43,13 @@ messagesRouter.get('/', async (req: Request, res: Response) => {
     try {
         const mspId = req.user as string;
         const contract = req.app.locals[mspId]?.messageContract as Contract;
+        logger.info(req.app.locals[mspId] ? `Found ${mspId} Contract` : `${mspId}`);
+        // const contract = getContract(mspId) as Contract;
         if (!contract) {
             return res.status(INTERNAL_SERVER_ERROR).json({
                 status: getReasonPhrase(INTERNAL_SERVER_ERROR),
                 reason: 'CONTRACT_NOT_FOUND',
-                message: 'Contract not found',
+                message: `Contract not found for MSP ID ${mspId}`,
                 timestamp: new Date().toISOString(),
             });
         }
@@ -61,6 +65,8 @@ messagesRouter.get('/', async (req: Request, res: Response) => {
         logger.error({ err }, 'Error processing get all messages request');
         return res.status(INTERNAL_SERVER_ERROR).json({
             status: getReasonPhrase(INTERNAL_SERVER_ERROR),
+            error: err instanceof Error ? err.message : 'Unknown error',
+            stack: err instanceof Error ? err.stack : undefined,
             timestamp: new Date().toISOString(),
         });
     }

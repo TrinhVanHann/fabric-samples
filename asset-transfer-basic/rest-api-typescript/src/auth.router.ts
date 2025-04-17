@@ -1,20 +1,13 @@
 import express, { Request, Response } from 'express';
-import { Gateway, Wallets, X509Identity } from 'fabric-network';
 import path from 'path';
-import fs from 'fs';
 import { body, validationResult } from 'express-validator';
 import FabricCAServices from 'fabric-ca-client';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 import crypto from 'crypto';
 import { logger } from './logger';
-import {
-    createGateway,
-    createWallet,
-    getContracts,
-    getNetwork,
-} from './fabric';
-import * as config from './config';
 import { loginWithPrivateKey } from './auth.service';
+import * as config from './config';
+import { setContract } from './contracts.store';
 
 const { ACCEPTED, BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK, UNAUTHORIZED } =
     StatusCodes;
@@ -22,9 +15,6 @@ const { ACCEPTED, BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK, UNAUTHORIZE
 const authRouter = express.Router();
 
 const apiKeyStore = new Map<string, string>();
-
-const ccpPath = '/test-network/organizations/peerOrganizations/org1.example.com/connection-org1.json';
-const walletPath = path.join(__dirname, 'wallet');
 
 authRouter.post(
     '/login',
@@ -41,14 +31,19 @@ authRouter.post(
         const { userId, privateKey } = req.body;
 
         try {
-            const success = await loginWithPrivateKey(userId, privateKey);
+            const contract = await loginWithPrivateKey(userId, privateKey);
 
-            if (!success) {
+            if (!contract) {
                 return res.status(401).json({
                     status: 'Unauthorized',
                     message: 'Login failed',
                 });
             }
+
+            req.app.locals[userId] = contract;
+            logger.info(req.app.locals[userId] ? "Found" : "Not Found");
+
+            // setContract(userId, contract);
 
             // Generate apiKey or JWT here
             const apiKey = crypto.randomBytes(32).toString('hex');
@@ -69,7 +64,5 @@ authRouter.post(
     }
 );
 
-
-// Export store để dùng trong middleware xác thực
 export { apiKeyStore };
 export default authRouter;
