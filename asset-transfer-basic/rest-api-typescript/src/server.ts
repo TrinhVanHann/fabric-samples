@@ -46,10 +46,10 @@ export const createServer = async (): Promise<Application> => {
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
 
-    // define passport startegy
+    // Define passport strategy
     passport.use(fabricAPIKeyStrategy);
 
-    // initialize passport js
+    // Initialize passport js
     app.use(passport.initialize());
 
     if (process.env.NODE_ENV === 'development') {

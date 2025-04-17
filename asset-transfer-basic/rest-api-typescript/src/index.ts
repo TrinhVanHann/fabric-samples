@@ -62,9 +62,6 @@ async function main() {
 
     // app.locals[config.mspIdOrg2] = contractsOrg2;
 
-    // logger.info(contractsOrg1.messageContract ? "Contract1 Found" : "Contract1 Not Found");
-    // logger.info(contractsOrg2 ? "Contract2 Found" : "Contract2 Not Found");
-
     logger.info('Initialising submit job queue');
     jobQueue = initJobQueue();
     jobQueueWorker = initJobQueueWorker(app);

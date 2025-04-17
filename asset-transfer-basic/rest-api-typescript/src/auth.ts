@@ -4,8 +4,28 @@ import { NextFunction, Request, Response } from 'express';
 import { HeaderAPIKeyStrategy } from 'passport-headerapikey';
 import { StatusCodes, getReasonPhrase } from 'http-status-codes';
 import { apiKeyStore } from './auth.router'; // 👈 Import store từ login router
+import dotenv from 'dotenv';
+dotenv.config();
+export const ADMIN_API_KEY = process.env.ADMIN_API_KEY!;
 
 const { UNAUTHORIZED } = StatusCodes;
+
+// Purely to serve /api/ca/enroll-admin
+export const checkAdminApiKey = (req: Request, res: Response, next: NextFunction): void => {
+    const apiKey = req.header('X-Admin-Key');
+
+    if (apiKey && apiKey === ADMIN_API_KEY) {
+        logger.debug('✅ Valid admin API key');
+        return next();
+    }
+
+    logger.warn('❌ Invalid admin API key');
+    res.status(UNAUTHORIZED).json({
+        status: getReasonPhrase(UNAUTHORIZED),
+        reason: 'INVALID_ADMIN_API_KEY',
+        timestamp: new Date().toISOString(),
+    });
+};
 
 export const fabricAPIKeyStrategy: HeaderAPIKeyStrategy =
     new HeaderAPIKeyStrategy(
