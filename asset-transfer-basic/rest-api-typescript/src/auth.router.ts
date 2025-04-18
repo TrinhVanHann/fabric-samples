@@ -1,16 +1,23 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import express, { Request, Response } from 'express';
-import path from 'path';
+// import path from 'path';
 import { body, validationResult } from 'express-validator';
-import FabricCAServices from 'fabric-ca-client';
-import { getReasonPhrase, StatusCodes } from 'http-status-codes';
+// import FabricCAServices from 'fabric-ca-client';
+// import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 import crypto from 'crypto';
 import { logger } from './logger';
 import { loginWithPrivateKey } from './auth.service';
-import * as config from './config';
-import { setContract } from './contracts.store';
+// import * as config from './config';
+// import { setContract } from './contracts.store';
 
-const { ACCEPTED, BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK, UNAUTHORIZED } =
-    StatusCodes;
+// const {
+//     // ACCEPTED,
+//     // BAD_REQUEST,
+//     // INTERNAL_SERVER_ERROR,
+//     // NOT_FOUND,
+//     // OK,
+//     // UNAUTHORIZED,
+// } = StatusCodes;
 
 const authRouter = express.Router();
 
@@ -41,7 +48,7 @@ authRouter.post(
             }
 
             req.app.locals[userId] = contract;
-            logger.info(req.app.locals[userId] ? "Found" : "Not Found");
+            logger.info(req.app.locals[userId] ? 'Found' : 'Not Found');
 
             // setContract(userId, contract);
 

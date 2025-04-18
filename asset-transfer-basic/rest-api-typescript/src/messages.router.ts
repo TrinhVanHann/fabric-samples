@@ -27,8 +27,8 @@ import { AssetNotFoundError } from './errors';
 import { evaluateTransaction } from './fabric';
 import { addSubmitTransactionJob } from './jobs';
 import { logger } from './logger';
-import * as config from './config';
-import { getContract } from './contracts.store';
+// import * as config from './config';
+// import { getContract } from './contracts.store';
 
 const { ACCEPTED, BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK } =
     StatusCodes;
@@ -43,7 +43,9 @@ messagesRouter.get('/', async (req: Request, res: Response) => {
     try {
         const mspId = req.user as string;
         const contract = req.app.locals[mspId]?.messageContract as Contract;
-        logger.info(req.app.locals[mspId] ? `Found ${mspId} Contract` : `${mspId}`);
+        logger.info(
+            req.app.locals[mspId] ? `Found ${mspId} Contract` : `${mspId}`
+        );
         // const contract = getContract(mspId) as Contract;
         if (!contract) {
             return res.status(INTERNAL_SERVER_ERROR).json({

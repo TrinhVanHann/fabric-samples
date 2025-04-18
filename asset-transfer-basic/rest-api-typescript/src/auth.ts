@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { logger } from './logger';
 import passport from 'passport';
 import { NextFunction, Request, Response } from 'express';
@@ -11,7 +12,11 @@ export const ADMIN_API_KEY = process.env.ADMIN_API_KEY!;
 const { UNAUTHORIZED } = StatusCodes;
 
 // Purely to serve /api/ca/enroll-admin
-export const checkAdminApiKey = (req: Request, res: Response, next: NextFunction): void => {
+export const checkAdminApiKey = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): void => {
     const apiKey = req.header('X-Admin-Key');
 
     if (apiKey && apiKey === ADMIN_API_KEY) {

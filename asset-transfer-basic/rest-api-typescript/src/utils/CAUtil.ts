@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import FabricCAServices from 'fabric-ca-client';
 import { Wallet, X509Identity } from 'fabric-network';
 
@@ -20,7 +21,7 @@ export function buildCAClient(
     const caTLSCACerts = caInfo.tlsCACerts.pem;
 
     const caClient = new FabricCAServices(
-        "https://ca_org1:7054", // Used to be caInfo.url but localhost (::1) means itself (Node Server), not CA server
+        'https://ca_org1:7054', // Used to be caInfo.url but localhost (::1) means itself (Node Server), not CA server
         { trustedRoots: caTLSCACerts, verify: false },
         caInfo.caName
     );
@@ -40,7 +41,9 @@ export async function enrollAdmin(
     try {
         const identity = await wallet.get(adminUserId);
         if (identity) {
-            console.log('An identity for the admin user already exists in the wallet');
+            console.log(
+                'An identity for the admin user already exists in the wallet'
+            );
             return;
         }
 
@@ -59,9 +62,13 @@ export async function enrollAdmin(
         };
 
         await wallet.put(adminUserId, x509Identity);
-        console.log('Successfully enrolled admin user and imported it into the wallet');
+        console.log(
+            'Successfully enrolled admin user and imported it into the wallet'
+        );
     } catch (error) {
-        console.error(`Failed to enroll admin user : ${(error as Error).message}`);
+        console.error(
+            `Failed to enroll admin user : ${(error as Error).message}`
+        );
     }
 }
 
@@ -78,19 +85,28 @@ export async function registerAndEnrollUser(
     try {
         const userIdentity = await wallet.get(userId);
         if (userIdentity) {
-            console.log(`An identity for the user ${userId} already exists in the wallet`);
+            console.log(
+                `An identity for the user ${userId} already exists in the wallet`
+            );
             return;
         }
 
         const adminIdentity = await wallet.get(adminUserId);
         if (!adminIdentity) {
-            console.log('An identity for the admin user does not exist in the wallet');
+            console.log(
+                'An identity for the admin user does not exist in the wallet'
+            );
             console.log('Enroll the admin user before retrying');
             return;
         }
 
-        const provider = wallet.getProviderRegistry().getProvider(adminIdentity.type);
-        const adminUser = await provider.getUserContext(adminIdentity, adminUserId);
+        const provider = wallet
+            .getProviderRegistry()
+            .getProvider(adminIdentity.type);
+        const adminUser = await provider.getUserContext(
+            adminIdentity,
+            adminUserId
+        );
 
         const secret = await caClient.register(
             {
@@ -116,7 +132,9 @@ export async function registerAndEnrollUser(
         };
 
         await wallet.put(userId, x509Identity);
-        console.log(`Successfully registered and enrolled user ${userId} and imported it into the wallet`);
+        console.log(
+            `Successfully registered and enrolled user ${userId} and imported it into the wallet`
+        );
     } catch (error) {
         console.error(`Failed to register user : ${(error as Error).message}`);
     }

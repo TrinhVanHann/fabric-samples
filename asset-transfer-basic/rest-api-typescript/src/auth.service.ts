@@ -1,31 +1,34 @@
-import fs from 'fs';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// import fs from 'fs';
 import path from 'path';
 import * as config from './config';
 import {
     Contract,
-    DefaultEventHandlerStrategies,
-    DefaultQueryHandlerStrategies,
-    Gateway,
+    // DefaultEventHandlerStrategies,
+    // DefaultQueryHandlerStrategies,
+    // Gateway,
     Wallets,
     X509Identity,
 } from 'fabric-network';
 import {
     createGateway,
-    createWallet,
+    // createWallet,
     getContracts,
     getNetwork,
-    evaluateTransaction,
+    // evaluateTransaction,
 } from './fabric';
-import { logger } from './logger';
+// import { logger } from './logger';
 
-
-
-const ccpPath = '/test-network/organizations/peerOrganizations/org1.example.com/connection-org1.json';
+// const ccpPath =
+//     '/test-network/organizations/peerOrganizations/org1.example.com/connection-org1.json';
 const walletPath = path.join(__dirname, 'wallet');
 
-export const loginWithPrivateKey = async (userId: string, privateKey: string): Promise<{ messageContract: Contract; qsccContract: Contract }> => {
+export const loginWithPrivateKey = async (
+    userId: string,
+    privateKey: string
+): Promise<{ messageContract: Contract; qsccContract: Contract }> => {
     // Load connection profile
-    const ccp = JSON.parse(fs.readFileSync(ccpPath, 'utf8'));
+    // const ccp = JSON.parse(fs.readFileSync(ccpPath, 'utf8'));
 
     const wallet = await Wallets.newFileSystemWallet(walletPath);
     const storedIdentity = await wallet.get(userId);
@@ -50,7 +53,11 @@ export const loginWithPrivateKey = async (userId: string, privateKey: string): P
     const tempWallet = await Wallets.newInMemoryWallet();
     await tempWallet.put(userId, tempIdentity);
 
-    const gateway = await createGateway(config.connectionProfileOrg1, userId, tempWallet);
+    const gateway = await createGateway(
+        config.connectionProfileOrg1,
+        userId,
+        tempWallet
+    );
     try {
         const network = await getNetwork(gateway);
         const contract = await getContracts(network);

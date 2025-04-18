@@ -1,21 +1,42 @@
 import express, { Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
-import { Contract, X509Identity } from 'fabric-network';
-import { getReasonPhrase, StatusCodes } from 'http-status-codes';
+import {
+    // Contract,
+    X509Identity,
+} from 'fabric-network';
+import {
+    // getReasonPhrase,
+    StatusCodes,
+} from 'http-status-codes';
 import { logger } from './logger';
 import * as config from './config';
 import { checkAdminApiKey } from './auth';
 
 import FabricCAServices from 'fabric-ca-client';
-import { buildCAClient, enrollAdmin, registerAndEnrollUser } from './utils/CAUtil';
+import {
+    buildCAClient,
+    enrollAdmin,
+    registerAndEnrollUser,
+} from './utils/CAUtil';
 
 import path from 'path';
-import fs from 'fs';
+// import fs from 'fs';
 import { Wallets } from 'fabric-network';
-import { createGateway, evaluateTransaction, getContracts, getNetwork } from './fabric';
+// import {
+//     createGateway,
+//     evaluateTransaction,
+//     getContracts,
+//     getNetwork,
+// } from './fabric';
 
-const { ACCEPTED, BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK, UNAUTHORIZED } =
-    StatusCodes;
+const {
+    // ACCEPTED,
+    BAD_REQUEST,
+    INTERNAL_SERVER_ERROR,
+    // NOT_FOUND,
+    OK,
+    UNAUTHORIZED,
+} = StatusCodes;
 
 const ccp = config.connectionProfileOrg1; // Lets work with Org1 for now
 const walletPath = path.join(__dirname, 'wallet');
@@ -23,45 +44,49 @@ const caHostName = 'ca.org1.example.com';
 const mspOrg1 = 'Org1MSP';
 
 export const CaRouter = express.Router();
-CaRouter.get('/test', (req, res) =>
-    res.send('✅CA endpoint is active✅.')
-);
+CaRouter.get('/test', (req, res) => res.send('✅CA endpoint is active✅.'));
 
 /**
  * GET /ca/enroll-admin
  * Enroll admin and store in wallet
  */
-CaRouter.get('/enroll-admin', checkAdminApiKey, async (req: Request, res: Response) => {
-    try {
-        const caClient = buildCAClient(FabricCAServices, ccp, caHostName);
-        const wallet = await Wallets.newFileSystemWallet(walletPath);
+CaRouter.get(
+    '/enroll-admin',
+    checkAdminApiKey,
+    async (req: Request, res: Response) => {
+        try {
+            const caClient = buildCAClient(FabricCAServices, ccp, caHostName);
+            const wallet = await Wallets.newFileSystemWallet(walletPath);
 
-        const adminExists = await wallet.get('admin');
+            const adminExists = await wallet.get('admin');
 
-        if (!adminExists) {
-            logger.info('Enrolling admin...');
-            await enrollAdmin(caClient, wallet, mspOrg1);
-        } else {
-            logger.info('Admin already enrolled.');
+            if (!adminExists) {
+                logger.info('Enrolling admin...');
+                await enrollAdmin(caClient, wallet, mspOrg1);
+            } else {
+                logger.info('Admin already enrolled.');
+            }
+
+            const adminIdentity = (await wallet.get('admin')) as X509Identity;
+
+            if (!adminIdentity) {
+                return res
+                    .status(INTERNAL_SERVER_ERROR)
+                    .json({ message: '❌ Cannot load admin identity' });
+            }
+
+            const { privateKey } = adminIdentity.credentials;
+
+            res.status(OK).json({
+                message: '✅ Admin enrolled or already existed',
+                privateKey,
+            });
+        } catch (err) {
+            logger.error(`Error enrolling admin: ${(err as Error).message}`);
+            res.status(INTERNAL_SERVER_ERROR).send('❌ Failed to enroll admin');
         }
-
-        const adminIdentity = await wallet.get('admin') as X509Identity;
-
-        if (!adminIdentity) {
-            return res.status(INTERNAL_SERVER_ERROR).json({ message: '❌ Cannot load admin identity' });
-        }
-
-        const { privateKey } = adminIdentity.credentials;
-
-        res.status(OK).json({
-            message: '✅ Admin enrolled or already existed',
-            privateKey,
-        });
-    } catch (err) {
-        logger.error(`Error enrolling admin: ${(err as Error).message}`);
-        res.status(INTERNAL_SERVER_ERROR).send('❌ Failed to enroll admin');
     }
-});
+);
 
 /**
  * POST /ca/register
@@ -89,10 +114,12 @@ CaRouter.post(
             const caClient = buildCAClient(FabricCAServices, ccp, caHostName);
             const wallet = await Wallets.newFileSystemWallet(walletPath);
 
-            const adminIdentity = await wallet.get('admin') as X509Identity;
+            const adminIdentity = (await wallet.get('admin')) as X509Identity;
 
             if (!adminIdentity) {
-                return res.status(UNAUTHORIZED).json({ message: '❌ Admin identity not found in wallet' });
+                return res
+                    .status(UNAUTHORIZED)
+                    .json({ message: '❌ Admin identity not found in wallet' });
             }
 
             // compare the private key from the request with the one in the wallet
@@ -107,15 +134,25 @@ CaRouter.post(
             const normalizedSubmitted = normalizeKey(submittedPrivateKey);
 
             if (normalizedReal !== normalizedSubmitted) {
-                return res.status(UNAUTHORIZED).json({ message: '❌ Invalid admin private key' });
+                return res
+                    .status(UNAUTHORIZED)
+                    .json({ message: '❌ Invalid admin private key' });
             }
 
-            await registerAndEnrollUser(caClient, wallet, mspOrg1, userId, affiliation);
+            await registerAndEnrollUser(
+                caClient,
+                wallet,
+                mspOrg1,
+                userId,
+                affiliation
+            );
 
-            const userIdentity = await wallet.get(userId) as X509Identity;
+            const userIdentity = (await wallet.get(userId)) as X509Identity;
 
             if (!userIdentity) {
-                return res.status(INTERNAL_SERVER_ERROR).send('❌ Failed to retrieve newly registered identity');
+                return res
+                    .status(INTERNAL_SERVER_ERROR)
+                    .send('❌ Failed to retrieve newly registered identity');
             }
 
             res.status(OK).json({
@@ -124,7 +161,9 @@ CaRouter.post(
             });
         } catch (err) {
             logger.error(`Error registering user: ${(err as Error).message}`);
-            res.status(INTERNAL_SERVER_ERROR).send('❌ Failed to register user');
+            res.status(INTERNAL_SERVER_ERROR).send(
+                '❌ Failed to register user'
+            );
         }
     }
 );

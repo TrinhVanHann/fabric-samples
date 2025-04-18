@@ -116,7 +116,11 @@ export const processSubmitTransactionJob = async (
     logger.debug({ jobId: job.id, jobName: job.name }, 'Processing job');
 
     const contract = app.locals[job.data.mspid]?.messageContract as Contract;
-    logger.info(app.locals[job.data.mspid] ? `Found ${job.data.mspid} Contract` : `${job.data.mspid}`);
+    logger.info(
+        app.locals[job.data.mspid]
+            ? `Found ${job.data.mspid} Contract`
+            : `${job.data.mspid}`
+    );
 
     if (contract === undefined) {
         logger.error(

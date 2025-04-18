@@ -7,12 +7,12 @@
  */
 
 import * as config from './config';
-import {
-    createGateway,
-    createWallet,
-    getContracts,
-    getNetwork,
-} from './fabric';
+// import {
+//     createGateway,
+//     createWallet,
+//     getContracts,
+//     getNetwork,
+// } from './fabric';
 import {
     initJobQueue,
     initJobQueueScheduler,
