@@ -26,6 +26,7 @@ services:
     volumes:
       - ./:/app
       - /app/node_modules
+      - /mnt/d/241/DACN/Blockchain/HF/Telusko/test/fabric-samples/test-network:/test-network
     networks:
       - fabric_test
     # Tùy chọn để giữ container chạy và dễ debug
